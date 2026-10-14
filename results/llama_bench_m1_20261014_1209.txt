@@ -1,0 +1,17 @@
+# llama-bench run
+# Date: 2026-10-14T12:11:34.375522
+# Model: models/phi3-mini-q4.gguf
+# Command: llama-bench -m models/phi3-mini-q4.gguf -t 2,4,6,8 -n 128 -p 512 -r 3
+
+| model                          |       size |     params | backend    | threads |            test |                  t/s |
+| ------------------------------ | ---------: | ---------: | ---------- | ------: | --------------: | -------------------: |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       2 |           pp512 |        201.29 ± 1.16 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       2 |           tg128 |         23.22 ± 0.11 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       4 |           pp512 |        204.17 ± 0.07 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       4 |           tg128 |         23.31 ± 0.01 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       6 |           pp512 |        203.64 ± 0.15 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       6 |           tg128 |         23.37 ± 0.03 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       8 |           pp512 |        202.66 ± 0.14 |
+| phi3 3B Q4_K - Medium          |   2.23 GiB |     3.82 B | BLAS,MTL   |       8 |           tg128 |         23.29 ± 0.18 |
+
+build: d81235049 (11429)
