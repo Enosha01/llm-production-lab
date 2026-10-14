@@ -1,0 +1,37 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Environment variables
+.env
+
+# Models (large files)
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Results (large files)
+results/*.csv
+results/*.json
+results/*.html
