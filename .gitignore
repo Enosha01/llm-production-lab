@@ -30,8 +30,3 @@ models/
 # Logs
 *.log
 logs/
-
-# Results (large files)
-results/*.csv
-results/*.json
-results/*.html
