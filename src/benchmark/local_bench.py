@@ -1,58 +1,86 @@
 """
-Local llama.cpp benchmark wrapper for M1 Metal.
-
-Runs llama-bench across thread counts and saves results.
+Local benchmark: latency and throughput of the FastAPI inference server.
+Compares short vs medium vs long prompts.
+Outputs results to results/local_bench.csv
 """
 
-import subprocess
-import os
-import sys
+import time
+import csv
+import httpx
 from pathlib import Path
-from datetime import datetime
+
+API_URL = "http://localhost:8001/generate"
+OUTPUT = Path("results/local_bench.csv")
+
+PROMPTS = {
+    "short": "What is 2+2?",
+    "medium": "Explain what a transformer neural network is in three sentences.",
+    "long": (
+        "Explain the history of artificial intelligence in detail. "
+        "Start from the 1950s Dartmouth conference, cover symbolic AI, "
+        "the AI winters, expert systems, machine learning, deep learning, "
+        "and end with the current era of large language models. "
+        "Be thorough and include specific dates, researchers, and milestones."
+    )
+}
+
+MAX_TOKENS = 100
+RUNS_PER_PROMPT = 3
 
 
-MODEL = "models/phi3-mini-q4.gguf"
-RESULTS_DIR = Path("results")
-RESULTS_DIR.mkdir(exist_ok=True)
+def run_single(prompt: str, max_tokens: int = MAX_TOKENS) -> dict:
+    start = time.time()
+    response = httpx.post(
+        API_URL,
+        json={"prompt": prompt, "max_tokens": max_tokens},
+        timeout=120.0
+    )
+    total_ms = (time.time() - start) * 1000
+    data = response.json()
+
+    return {
+        "latency_ms": round(total_ms, 2),
+        "server_latency_ms": data.get("latency_ms", 0),
+        "output_chars": len(data.get("text", "")),
+        "text": data.get("text", "")[:80]
+    }
 
 
-def run_bench(model: str, threads: str, out_file: str):
-    """Run llama-bench and save output to file."""
-    cmd = [
-        "llama-bench",
-        "-m", model,
-        "-t", threads,
-        "-n", "128",
-        "-p", "512",
-        "-r", "3",
-    ]
+def run_benchmark():
+    OUTPUT.parent.mkdir(exist_ok=True)
+    results = []
 
-    print(f"Running: {' '.join(cmd)}")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    print("Starting benchmark...")
+    print(f"Prompts: {list(PROMPTS.keys())}")
+    print(f"Runs per prompt: {RUNS_PER_PROMPT}")
+    print("-" * 60)
 
-    if result.returncode != 0:
-        print(f"Error: {result.stderr}")
-        sys.exit(1)
+    for label, prompt in PROMPTS.items():
+        print(f"\nPrompt type: {label} ({len(prompt)} chars)")
+        for i in range(RUNS_PER_PROMPT):
+            try:
+                r = run_single(prompt)
+                r["prompt_type"] = label
+                r["prompt_chars"] = len(prompt)
+                r["run"] = i + 1
+                results.append(r)
+                print(
+                    f"  Run {i+1}: {r['latency_ms']} ms | "
+                    f"{r['output_chars']} chars | {r['text'][:40]}..."
+                )
+            except Exception as e:
+                print(f"  Run {i+1}: ERROR — {e}")
 
-    # Save output
-    with open(out_file, "w") as f:
-        f.write(f"# llama-bench run\n")
-        f.write(f"# Date: {datetime.now().isoformat()}\n")
-        f.write(f"# Model: {model}\n")
-        f.write(f"# Command: {' '.join(cmd)}\n\n")
-        f.write(result.stdout)
-
-    print(result.stdout)
-    print(f"\nSaved to: {out_file}")
+    # Write CSV
+    if results:
+        with open(OUTPUT, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=results[0].keys())
+            writer.writeheader()
+            writer.writerows(results)
+        print(f"\n✅ Results saved to {OUTPUT}")
+    else:
+        print("\n❌ No results to save")
 
 
 if __name__ == "__main__":
-    if not os.path.exists(MODEL):
-        print(f"Model not found: {MODEL}")
-        print("Download Phi-3-mini GGUF first.")
-        sys.exit(1)
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    out_file = str(RESULTS_DIR / f"llama_bench_m1_{timestamp}.txt")
-
-    run_bench(MODEL, "2,4,6,8", out_file)
+    run_benchmark()
