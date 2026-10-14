@@ -1,0 +1,12 @@
+latency_ms,server_latency_ms,output_chars,text,prompt_type,prompt_chars,run
+1029.22,1014.17,24,The sum of 2 and 2 is 4.,short,12,1
+114.51,99.84,1,4,short,12,2
+519.72,502.99,24,The sum of 2 and 2 is 4.,short,12,3
+4022.82,4006.33,503,A transformer neural network is a deep learning model that utilizes self-attenti,medium,64,1
+3441.86,3424.6,479,A transformer neural network is a model architecture that relies on self-attenti,medium,64,2
+3871.43,3855.82,527,A transformer neural network is a model architecture that primarily uses self-at,medium,64,3
+4440.92,4423.71,362,"
+The history of artificial intelligence (AI) is a fascininating journey that beg",long,308,1
+3893.99,3867.24,407,"Artificial intelligence (AI) has a rich and fascinating history, marked by numer",long,308,2
+3886.39,3868.86,380,"
+The history of artificial intelligence (AI) is a rich and complex tale of innov",long,308,3
